@@ -2,10 +2,10 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<title>Transparent Overlay</title>
+<title>TikTok Gift Overlay</title>
 
 <style>
-/* QUAN TRỌNG: nền trong suốt tuyệt đối */
+/* ===== NỀN TRONG SUỐT TUYỆT ĐỐI ===== */
 html, body {
     margin: 0;
     padding: 0;
@@ -13,68 +13,96 @@ html, body {
     height: 100%;
     background: transparent;
     overflow: hidden;
+    pointer-events: none; /* click xuyên */
 }
 
-/* Ví dụ: khung overlay */
-.overlay-box {
-    position: fixed;
-    top: 30px;
-    right: 30px;
-    padding: 20px 30px;
-
-    background: rgba(0, 0, 0, 0.4); /* trong suốt */
-    border-radius: 12px;
-
-    color: #fff;
-    font-family: Arial, sans-serif;
-    font-size: 20px;
-
-    box-shadow: 0 0 20px rgba(0,255,255,0.6);
-    animation: glow 2s infinite alternate;
-}
-
-/* Hiệu ứng */
-@keyframes glow {
-    from { box-shadow: 0 0 10px cyan; }
-    to   { box-shadow: 0 0 25px cyan; }
-}
-
-/* Ví dụ text chạy */
-.marquee {
+/* ===== VIDEO ===== */
+.video-box {
     position: fixed;
     bottom: 40px;
-    left: 100%;
-    white-space: nowrap;
-    font-size: 26px;
-    color: yellow;
-    animation: run 12s linear infinite;
+    right: 40px;
 }
 
-@keyframes run {
-    from { transform: translateX(0); }
-    to   { transform: translateX(-200%); }
+video {
+    width: 300px;
+    border-radius: 20px;
+    display: none;
+    box-shadow: 0 0 30px rgba(255, 105, 180, 0.8);
 }
 </style>
 </head>
 
 <body>
 
-<div class="overlay-box">
-    🔴 LIVE<br>
-    Người xem: <span id="view">123</span>
-</div>
-
-<div class="marquee">
-    ✨ Chào mừng bạn đến với livestream ✨
+<div class="video-box">
+    <video id="giftVideo"
+        muted
+        playsinline
+        src="https://vutringocanh.github.io/video/video.mp4">
+    </video>
 </div>
 
 <script>
-/* JS ví dụ */
-let view = 123;
-setInterval(() => {
-    view += Math.floor(Math.random() * 3);
-    document.getElementById("view").innerText = view;
-}, 2000);
+/* =============================
+   VIDEO + SPAM CONTROL
+============================= */
+
+const giftVideo = document.getElementById("giftVideo");
+
+let isPlaying = false;
+let lastPlayTime = 0;
+const COOLDOWN = 4000; // 4 giây
+let queue = 0;
+
+function tryPlayVideo() {
+    const now = Date.now();
+
+    if (isPlaying) return;
+
+    if (now - lastPlayTime < COOLDOWN) return;
+
+    if (queue <= 0) return;
+
+    queue--;
+    isPlaying = true;
+    lastPlayTime = now;
+
+    giftVideo.style.display = "block";
+    giftVideo.currentTime = 0;
+
+    giftVideo.play().catch(() => {});
+}
+
+giftVideo.addEventListener("ended", () => {
+    giftVideo.style.display = "none";
+    isPlaying = false;
+
+    setTimeout(tryPlayVideo, 500); // kiểm tra hàng đợi
+});
+
+/* =============================
+   SSE CONNECT (GIỮ NGUYÊN)
+============================= */
+
+let eventSource = new EventSource("http://localhost:5001/events");
+
+eventSource.onmessage = (event) => {
+    const data = JSON.parse(event.data);
+    handleMessage(data);
+};
+
+function handleMessage(data) {
+    if (data.type !== "gift") return;
+
+    const giftName = (data.gift || "").toLowerCase();
+    const count = data.count || 1;
+
+    // ===== ROSE =====
+    if (giftName.includes("ros")) {
+        queue += Math.min(count, 3); // giới hạn gộp
+        tryPlayVideo();
+    }
+}
 </script>
 
 </body>
