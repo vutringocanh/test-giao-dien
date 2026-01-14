@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Transparent Overlay</title>
+
+<style>
+/* QUAN TRỌNG: nền trong suốt tuyệt đối */
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    overflow: hidden;
+}
+
+/* Ví dụ: khung overlay */
+.overlay-box {
+    position: fixed;
+    top: 30px;
+    right: 30px;
+    padding: 20px 30px;
+
+    background: rgba(0, 0, 0, 0.4); /* trong suốt */
+    border-radius: 12px;
+
+    color: #fff;
+    font-family: Arial, sans-serif;
+    font-size: 20px;
+
+    box-shadow: 0 0 20px rgba(0,255,255,0.6);
+    animation: glow 2s infinite alternate;
+}
+
+/* Hiệu ứng */
+@keyframes glow {
+    from { box-shadow: 0 0 10px cyan; }
+    to   { box-shadow: 0 0 25px cyan; }
+}
+
+/* Ví dụ text chạy */
+.marquee {
+    position: fixed;
+    bottom: 40px;
+    left: 100%;
+    white-space: nowrap;
+    font-size: 26px;
+    color: yellow;
+    animation: run 12s linear infinite;
+}
+
+@keyframes run {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-200%); }
+}
+</style>
+</head>
+
+<body>
+
+<div class="overlay-box">
+    🔴 LIVE<br>
+    Người xem: <span id="view">123</span>
+</div>
+
+<div class="marquee">
+    ✨ Chào mừng bạn đến với livestream ✨
+</div>
+
+<script>
+/* JS ví dụ */
+let view = 123;
+setInterval(() => {
+    view += Math.floor(Math.random() * 3);
+    document.getElementById("view").innerText = view;
+}, 2000);
+</script>
+
+</body>
+</html>
